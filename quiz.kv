@@ -1,0 +1,205 @@
+<Widget>
+    font_size: "18sp"
+
+<BoxLayout>
+    spacing: 15
+
+<QuizLabel@Label>
+    font_size: "40sp"
+
+<ScreenLayout@BoxLayout>
+    orientation: "vertical"
+    padding: 30, 30
+    canvas.before:
+        Color:
+            rgba: 0.631, 0.839, 0.88, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<StyledButton@Button>
+    background_disabled_normal: "button_disabled.png"
+    background_normal: "button_normal.png"
+    background_down: "button_down.png"
+    bold: True
+
+<SelectTopicButton@ToggleButton>
+    background_disabled_normal: "button_disabled.png"
+    background_normal: "button_normal.png"
+    background_down: "button_down.png"
+    group: "topic"
+    bold: True
+    on_state: app.quiz_topic = self.text if self.state == "down" else ""
+
+<SelectQuizTypeButton@ToggleButton>
+    background_disabled_normal: "button_disabled.png"
+    background_normal: "button_normal.png"
+    background_down: "button_down.png"
+    group: "quiz_type"
+    bold: True
+    on_state: app.quiz_type = self.text if self.state == "down" else ""
+
+<CancelButton@StyledButton>
+    text: "Avbryt"
+    on_release:
+        app.sm.transition.direction = "right"
+        app.sm.current = "menu"
+
+
+<WelcomeScreen>:
+    FloatLayout:
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: "V\u00e4rldens l\u00e4nder, huvudst\u00e4der och flaggor"
+            font_size: "28sp"
+            bold: True
+            color: 0, 0, 0, 1
+            size_hint: 0.5, 0.1
+            pos_hint: {"x": 0.25, "y": 0.2}
+        Image:
+            source: "world_flags.png"
+            pos_hint: {"x": 0.2, "y": 0.35}
+            size_hint: 0.6, 0.6
+
+
+<MenuScreen>:
+    start_slider: start_slider
+    stop_slider: stop_slider
+    on_pre_enter:
+        app.title = "Quiz - L\u00e4nder och huvudst\u00e4der"
+    ScreenLayout:
+        BoxLayout:
+            SelectTopicButton:
+                text: "L\u00e4nder"
+            SelectTopicButton:
+                text: "Huvudst\u00e4der"
+            SelectTopicButton:
+                text: "Flaggor"
+                on_state:
+                    vocabulary_button.disabled = self.state == "down"
+                    vocabulary_button.state = "normal" if self.state == "down" else "normal"
+                    flashcards_button.state = "down"
+        BoxLayout:
+            SelectQuizTypeButton:
+                id: vocabulary_button
+                text: "Glosor"
+            SelectQuizTypeButton:
+                id: flashcards_button
+                text: "Flashcards"
+        BoxLayout:
+            Label:
+                text: "B\u00f6rja p\u00e5:"
+            Slider:
+                id: start_slider
+                min: 1
+                max: stop_slider.value
+                step: 1
+            Label:
+                text: str(start_slider.value)
+        BoxLayout:
+            Label:
+                text: "Stanna p\u00e5:"
+            Slider:
+                id: stop_slider
+                min: 1
+                max: app.num_loaded_questions
+                step: 1
+                value: app.num_loaded_questions
+            Label:
+                text: str(stop_slider.value)
+        StyledButton:
+            text: "Starta"
+            on_release: app.start_quiz()
+
+<VocabularyQuizScreen>:
+    question_label: question_label
+    result_label: result_label
+    text_input: text_input
+    on_enter: root.schedule_text_input_focus()
+    on_pre_leave: root.clean()
+    ScreenLayout:
+        QuizLabel:
+            id: question_label
+        TextInput:
+            id: text_input
+            font_size: self.height - 20
+            multiline: False
+            on_text_validate: app.check_answer()
+        QuizLabel:
+            id: result_label
+        CancelButton
+
+<ButtonPanel@BoxLayout>
+    orientation: "vertical"
+    BoxLayout:
+        orientation: "horizontal"
+        ToggleButton:
+            id: hint_button
+            text: "V\u00e4nd"
+            group: "toggle"
+            background_normal: "button_normal.png"
+            background_down: "button_down.png"
+            bold: True
+            on_release:
+                root.parent.parent.toggle_button_pressed(self.state)
+        StyledButton:
+            text: "R\u00e4tt"
+            background_normal: "button_correct_darker.png"
+            on_release:
+                app.correct_answers_counter = app.correct_answers_counter + 1
+                app.next_question() if app.questions else app.end_quiz()
+                hint_button.state = "normal"
+        StyledButton:
+            text: "Fel"
+            background_normal: "button_wrong.png"
+            on_release:
+                app.wrong_answers.append(app.question)
+                app.next_question() if app.questions else app.end_quiz()
+                hint_button.state = "normal"
+    CancelButton:
+        on_release: hint_button.state = "normal"
+
+<FlashcardsQuizScreen>:
+    question_label: question_label
+    ScreenLayout:
+        QuizLabel:
+            id: question_label
+        ButtonPanel
+
+<FlagsQuizScreen>
+    hint_label: hint_label
+    flag: flag
+    ScreenLayout:
+        Image:
+            id: flag
+        QuizLabel:
+            id: hint_label
+        ButtonPanel
+
+<ResultScreen>
+    result_label: result_label
+    retry_button: retry_button
+    on_pre_enter:
+        app.update_title()
+        root.display_result(app.correct_answers_counter, app.num_questions)
+    ScreenLayout:
+        QuizLabel:
+            id: result_label
+        StyledButton:
+            id: retry_button
+            text: "Tr\u00e4na p\u00e5 misstag"
+            on_release:
+                app.retry_quiz()
+                app.sm.transition.direction = "right"
+                app.sm.current = app.quiz_screen.name.lower()
+        StyledButton:
+            text: "Huvudmeny"
+            on_release:
+                app.sm.transition.direction = "right"
+                app.sm.current = "menu"
+                retry_button.disabled = False
