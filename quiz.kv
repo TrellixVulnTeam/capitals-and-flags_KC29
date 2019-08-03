@@ -18,23 +18,23 @@
             size: self.size
 
 <StyledButton@Button>
-    background_disabled_normal: "button_disabled.png"
-    background_normal: "button_normal.png"
-    background_down: "button_down.png"
+    background_disabled_normal: "buttons/button_disabled.png"
+    background_normal: "buttons/button_normal.png"
+    background_down: "buttons/button_down.png"
     bold: True
 
 <SelectTopicButton@ToggleButton>
-    background_disabled_normal: "button_disabled.png"
-    background_normal: "button_normal.png"
-    background_down: "button_down.png"
+    background_disabled_normal: "buttons/button_disabled.png"
+    background_normal: "buttons/button_normal.png"
+    background_down: "buttons/button_down.png"
     group: "topic"
     bold: True
     on_state: app.quiz_topic = self.text if self.state == "down" else ""
 
 <SelectQuizTypeButton@ToggleButton>
-    background_disabled_normal: "button_disabled.png"
-    background_normal: "button_normal.png"
-    background_down: "button_down.png"
+    background_disabled_normal: "buttons/button_disabled.png"
+    background_normal: "buttons/button_normal.png"
+    background_down: "buttons/button_down.png"
     group: "quiz_type"
     bold: True
     on_state: app.quiz_type = self.text if self.state == "down" else ""
@@ -142,21 +142,21 @@
             id: hint_button
             text: "V\u00e4nd"
             group: "toggle"
-            background_normal: "button_normal.png"
-            background_down: "button_down.png"
+            background_normal: "buttons/button_normal.png"
+            background_down: "buttons/button_down.png"
             bold: True
             on_release:
                 root.parent.parent.toggle_button_pressed(self.state)
         StyledButton:
             text: "R\u00e4tt"
-            background_normal: "button_correct_darker.png"
+            background_normal: "buttons/button_correct_darker.png"
             on_release:
                 app.correct_answers_counter = app.correct_answers_counter + 1
                 app.next_question() if app.questions else app.end_quiz()
                 hint_button.state = "normal"
         StyledButton:
             text: "Fel"
-            background_normal: "button_wrong.png"
+            background_normal: "buttons/button_wrong.png"
             on_release:
                 app.wrong_answers.append(app.question)
                 app.next_question() if app.questions else app.end_quiz()
