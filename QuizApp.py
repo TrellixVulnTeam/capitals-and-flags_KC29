@@ -324,11 +324,3 @@ class QuizApp(App):
             self.capitals = data["capitals"]
             self.country_to_capital = data["country_to_capital"]
             self.capital_to_country = data["capital_to_country"]
-
-
-def __main__():
-    QuizApp().run()
-
-
-if __name__ == "__main__":
-    __main__()
